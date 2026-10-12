@@ -2,8 +2,8 @@
 
 ## 1. Overview
 
-This repository is a reusable template for Google Cloud applications and proofs
-of concept. It supports two separate authentication paths:
+This public repository is a reusable template for Google Cloud applications and
+proofs of concept. It supports two separate authentication paths:
 
 - Local development uses an interactive `gcloud` login and Application Default
   Credentials (ADC).
@@ -79,7 +79,9 @@ exact repository ID, owner ID, repository name, and GitHub Environment.
 
 The service account receives only `roles/browser`, a read-only role sufficient
 for the project description test. The bootstrap administrator, not GitHub
-Actions, manages WIF and IAM.
+Actions, manages WIF and IAM. The provider condition is fixed to
+`refs/heads/main` and the selected Environment; change the workflow and
+bootstrap deliberately if a template copy uses a different protected branch.
 
 ## 6. GitHub Repository Configuration
 
@@ -96,8 +98,8 @@ Environment variables are used so a template copy can configure a different
 project and repository without source changes. Do not commit real values,
 tokens, credential files, or service account keys.
 
-In **Environment settings > Deployment branches and tags**, restrict which
-branches may use `gcp-poc` (for example, the default branch only). Add
+In **Environment settings > Deployment branches and tags**, restrict access to
+the `main` branch (or an explicitly reviewed protected rule). Add
 **Required reviewers** when human approval is needed before a job can access
 Google Cloud. The workflow's `environment: gcp-poc` must remain aligned with
 the provider's `assertion.environment` condition.
@@ -133,15 +135,22 @@ administration outside GitHub Actions.
 
 - WIF and short-lived credentials replace long-lived JSON keys.
 - The provider has an explicit condition for repository ID, owner ID,
-  repository name, and `gcp-poc`; it does not trust arbitrary repositories.
+  repository name, `refs/heads/main`, and `gcp-poc`; it does not trust
+  arbitrary repositories.
 - Environment branch restrictions and required reviewers provide the GitHub
-  control over which refs can request the credential.
-- Forks and pull requests cannot bypass the protected Environment settings.
-  This workflow does not use `pull_request_target`.
+  control over which refs can request the credential. The workflow is
+  `workflow_dispatch` only, so forks and pull requests do not trigger it.
+- A fork has a different repository and owner ID and therefore cannot satisfy
+  the provider condition. Pull request refs are not `refs/heads/main`; they
+  cannot satisfy it either. This workflow does not use `pull_request_target`.
 - `id-token: write` is limited to the one job that needs it.
-- Generated ADC and credential artifacts are ignored by `.gitignore`.
+- Generated ADC, credential artifacts, Terraform state, plans, and local
+  configuration are ignored by `.gitignore`.
 - Keep the WIF service account in the intended PoC project and do not grant
   permissions in other projects.
+- This public template contains no project-specific IDs, keys, tokens, or
+  credentials. Run bootstrap against your own Google Cloud project and never
+  copy the template author's project or service account variables.
 
 ## 10. Troubleshooting
 
@@ -149,7 +158,7 @@ administration outside GitHub Actions.
 2. Confirm the workflow uses the `gcp-poc` Environment and that its branch
    protection permits the branch being tested.
 3. Compare the provider's repository ID, owner ID, repository name, and
-   environment condition with the current repository.
+   `refs/heads/main` and environment conditions with the current repository.
 4. Confirm the service account has `roles/iam.workloadIdentityUser` for the
    repository's `principalSet` and `roles/browser` on the target project.
 5. Inspect the workflow's safe diagnostics. Never add token or credential
@@ -163,3 +172,12 @@ Future Copilot Cloud Agent or Agentic Workflow jobs can reuse the same WIF
 provider and Environment pattern. Give each PoC a dedicated service account
 or narrowly scoped role where practical. This repository intentionally does
 not include autonomous deployment or IAM-changing workflows.
+
+## Public Repository Checklist
+
+Before publishing a template copy, inspect the complete Git history and working
+tree for keys, access tokens, credential files, Terraform state, and local
+configuration. Configure secret scanning and push protection on the repository.
+Never add a credential to an issue, workflow log, README example, or commit;
+rotate it immediately if one is exposed. Every copy must bootstrap WIF in its
+own Google Cloud project using its own repository and owner IDs.

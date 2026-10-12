@@ -5,10 +5,18 @@ application_default_credentials.json
 gcloud-credentials.json
 .gcloud/
 
+# Terraform state and plans
+*.tfstate
+*.tfstate.*
+.terraform/
+*.tfplan
+
 # Local environment files
 .env
 .env.*
 !.env.example
+*.local
+*.local.*
 
 # Editor and operating-system files
 .DS_Store

@@ -84,7 +84,7 @@ if ! gcloud iam workload-identity-pools describe "$pool_id" \
     --project="$project_id"
 fi
 
-provider_condition="assertion.repository_id == '${repository_id}' && assertion.repository_owner_id == '${owner_id}' && assertion.repository == '${repository_owner}/${repository_name}' && assertion.environment == '${environment_name}'"
+provider_condition="assertion.repository_id == '${repository_id}' && assertion.repository_owner_id == '${owner_id}' && assertion.repository == '${repository_owner}/${repository_name}' && assertion.ref == 'refs/heads/main' && assertion.environment == '${environment_name}'"
 mapping="google.subject=assertion.sub,attribute.repository=assertion.repository,attribute.repository_id=assertion.repository_id,attribute.repository_owner_id=assertion.repository_owner_id,attribute.environment=assertion.environment"
 
 if gcloud iam workload-identity-pools providers describe "$provider_id" \
@@ -138,6 +138,7 @@ GCP_WIF_PROVIDER=${provider_resource}
 GCP_SERVICE_ACCOUNT=${service_account}
 
 The provider only accepts repository ${repository_owner}/${repository_name}
-(repository ID ${repository_id}), owner ID ${owner_id}, and environment
-${environment_name}. Environment branch protection remains a GitHub setting.
+(repository ID ${repository_id}), owner ID ${owner_id}, refs/heads/main, and
+environment ${environment_name}. Environment branch protection remains a
+GitHub setting.
 EOF
