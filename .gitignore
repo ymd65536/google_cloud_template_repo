@@ -1,0 +1,16 @@
+# Google Cloud and local authentication artifacts
+*.json
+*.jsonl
+application_default_credentials.json
+gcloud-credentials.json
+.gcloud/
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Editor and operating-system files
+.DS_Store
+.idea/
+.vscode/
