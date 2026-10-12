@@ -74,8 +74,12 @@ The script also accepts the corresponding environment variables; run
 `scripts/bootstrap-wif.sh --help` for their names. It enables the required
 APIs, creates or updates the pool and OIDC provider, creates the service
 account if necessary, and adds the WIF impersonation binding. Existing
-resources are reused rather than deleted. The provider condition requires the
-exact repository ID, owner ID, repository name, and GitHub Environment.
+resources are reused rather than deleted. Existing providers are updated only
+when their trust condition exactly matches this repository; otherwise the
+script stops safely. Use a repository-specific `--provider-id` rather than
+overwriting a provider configured for another repository. The provider
+condition requires the exact repository ID, owner ID, repository name, and
+GitHub Environment.
 
 The service account receives only `roles/browser`, a read-only role sufficient
 for the project description test. The bootstrap administrator, not GitHub
@@ -103,6 +107,11 @@ the `main` branch (or an explicitly reviewed protected rule). Add
 **Required reviewers** when human approval is needed before a job can access
 Google Cloud. The workflow's `environment: gcp-poc` must remain aligned with
 the provider's `assertion.environment` condition.
+
+The WIF condition also requires `refs/heads/main`. Consequently, a workflow
+run started from a working branch is expected to be rejected by Google Cloud;
+perform the connection check from the protected `main` branch. Pull request
+merge refs and fork refs are rejected as well.
 
 ## 7. Authentication Test
 

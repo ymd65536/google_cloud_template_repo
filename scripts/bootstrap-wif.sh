@@ -90,6 +90,19 @@ mapping="google.subject=assertion.sub,attribute.repository=assertion.repository,
 if gcloud iam workload-identity-pools providers describe "$provider_id" \
   --location=global --workload-identity-pool="$pool_id" \
   --project="$project_id" >/dev/null 2>&1; then
+  existing_condition="$(gcloud iam workload-identity-pools providers describe "$provider_id" \
+    --location=global --workload-identity-pool="$pool_id" \
+    --project="$project_id" --format='value(attributeCondition)')"
+  if [[ "$existing_condition" != "$provider_condition" ]]; then
+    cat >&2 <<EOF
+Refusing to update WIF provider ${provider_id}: its existing trust condition
+does not match this repository (${repository_owner}/${repository_name},
+repository ID ${repository_id}, owner ID ${owner_id}, refs/heads/main,
+environment ${environment_name}). Use a repository-specific --provider-id or
+review the existing provider manually.
+EOF
+    exit 1
+  fi
   gcloud iam workload-identity-pools providers update-oidc "$provider_id" \
     --location=global \
     --workload-identity-pool="$pool_id" \

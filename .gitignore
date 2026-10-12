@@ -1,6 +1,6 @@
 # Google Cloud and local authentication artifacts
-*.json
-*.jsonl
+gha-creds-*.json
+gha-creds-*.jsonl
 application_default_credentials.json
 gcloud-credentials.json
 .gcloud/
